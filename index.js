@@ -1,6 +1,5 @@
 require('dotenv').config();
-const PREFIX = process.env.PREFIX;
-
+const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
@@ -11,27 +10,17 @@ client.once('ready', () => {
 });
 
 client.on('message', async message => {
-    if (message.content === `${PREFIX}ping`) {        
+    if (!message.content.startsWith(process.env.PREFIX) || message.author.bot) return;
+
+    const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/);
+    const command = args.shift().toLowerCase();
+
+    if (command === 'ping'){
+        const pongEmbed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(':ping_pong: Pong')
+        .setDescription(`${client.ws.ping} ws`)
         
-        message.channel.send(`Pong: ${client.ws.ping} ms`);
-
-    } else if (message.content === `${PREFIX}join`) {
-        
-        if (message.member.voice.channel){
-            const connection = await message.member.voice.channel.join();
-            message.channel.send(`Joined channel \`${message.member.voice.channel}\``)
-        } else {
-            message.channel.send(`User is not in channel!`)
-        }
-
-    } else if (message.content === `${PREFIX}leave`){
-
-        if (message.member.voice.channel){
-            await message.member.voice.channel.leave();
-            message.channel.send(`Left channel \`${message.member.voice.channel}\``)
-        } else {
-            message.channel.send(`User is not in channel!`)
-        }
-
+        message.channel.send(pongEmbed);
     }
 });
